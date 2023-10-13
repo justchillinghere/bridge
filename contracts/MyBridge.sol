@@ -73,9 +73,9 @@ contract MyBridge is IMyBridge, AccessControl {
         address signer = message.toEthSignedMessageHash().recover(v, r, s);
         require(
             hasRole(VALIDATOR_ROLE, signer),
-            "Bridge: Invalid validator address"
+            "Bridge: Invalid validator address or signature"
         );
-        require(!usedNonce[_nonce], "Nonce already used");
+        require(!usedNonce[_nonce], "Bridge: Nonce already used");
         usedNonce[_nonce] = true;
         token.mint(recipient, amount);
         emit Transfer(sender, recipient, amount, _nonce, TransferType.Redeem);

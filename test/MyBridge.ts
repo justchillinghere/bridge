@@ -251,7 +251,7 @@ describe("Test Bridge contract", function () {
         contractETH.connect(sender).swap(recipient.address, 0)
       ).to.be.revertedWith("Amount must be greater than 0");
     });
-    it("Should not allow to reedeem if signer is not validator", async function () {
+    it("Should not allow to redeem if signer is not validator", async function () {
       await contractETH.connect(sender).swap(recipient.address, amount);
       nonce = await contractETH.nonce();
       let message = generateMessage(
@@ -278,7 +278,79 @@ describe("Test Bridge contract", function () {
             vrs.r,
             vrs.s
           )
-      ).to.be.revertedWith("Bridge: Invalid validator address");
+      ).to.be.revertedWith("Bridge: Invalid validator address or signature");
+    });
+    it("Should not allow to redeem if message is wrong", async function () {
+      await contractBSC.grantRole(
+        await contractBSC.VALIDATOR_ROLE(),
+        signer.address
+      );
+      let message = generateMessage(
+        recipient.address,
+        recipient.address,
+        amount,
+        0,
+        initChainId,
+        destChainId
+      );
+      let signature = await signMessage(message, signer);
+      let vrs = splitSignature(signature);
+      await expect(
+        contractBSC
+          .connect(recipient)
+          .redeem(
+            sender.address,
+            recipient.address,
+            amount,
+            0,
+            initChainId,
+            destChainId,
+            vrs.v,
+            vrs.r,
+            vrs.s
+          )
+      ).to.be.revertedWith("Bridge: Invalid validator address or signature");
+    });
+    it("Should not allow to redeem with used nonce", async function () {
+      await contractBSC.grantRole(
+        await contractBSC.VALIDATOR_ROLE(),
+        signer.address
+      );
+      await swapAndRedeem(
+        sender,
+        recipient,
+        amount,
+        initChainId,
+        destChainId,
+        contractETH,
+        contractBSC,
+        signer
+      );
+      let message = generateMessage(
+        sender.address,
+        recipient.address,
+        amount,
+        await contractETH.nonce(),
+        initChainId,
+        destChainId
+      );
+      let signature = await signMessage(message, signer);
+      let vrs = splitSignature(signature);
+      await expect(
+        contractBSC
+          .connect(recipient)
+          .redeem(
+            sender.address,
+            recipient.address,
+            amount,
+            await contractETH.nonce(),
+            initChainId,
+            destChainId,
+            vrs.v,
+            vrs.r,
+            vrs.s
+          )
+      ).to.be.revertedWith("Bridge: Nonce already used");
     });
   });
 });
