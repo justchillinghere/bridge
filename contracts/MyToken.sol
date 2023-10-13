@@ -39,6 +39,6 @@ contract MyToken is ERC20, AccessControl {
      * @param amount The amount of tokens to burn.
      */
     function burn(address from, uint256 amount) public onlyRole(BURNER_ROLE) {
-        _mint(from, amount);
+        _burn(from, amount);
     }
 }

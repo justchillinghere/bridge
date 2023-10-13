@@ -17,14 +17,12 @@ contract MyBridge is IMyBridge, AccessControl {
     address public admin;
     MyToken public token;
     uint256 public nonce;
-    uint256 public initChainId;
-    uint256 public destChainId;
     mapping(uint256 => bool) public usedNonce;
 
     bytes32 public constant VALIDATOR_ROLE = keccak256("VALIDATOR_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    enum SwapType {
+    enum TransferType {
         Swap,
         Redeem
     }
@@ -33,35 +31,30 @@ contract MyBridge is IMyBridge, AccessControl {
         address to,
         uint256 amount,
         uint256 nonce,
-        SwapType swapType
+        TransferType swapType
     );
 
-    constructor(address _token, uint256 _destChainId) {
+    constructor(address _token) {
         token = MyToken(_token);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(ADMIN_ROLE, msg.sender);
         _setRoleAdmin(VALIDATOR_ROLE, ADMIN_ROLE);
-        initChainId = block.chainid;
-        destChainId = _destChainId;
-    }
-
-    function grantValidatorRole(
-        address newValidator
-    ) public onlyRole(ADMIN_ROLE) {
-        grantRole(VALIDATOR_ROLE, newValidator);
     }
 
     function swap(address recepient, uint256 amount) public {
+        require(amount > 0, "Amount must be greater than 0");
         token.burn(msg.sender, amount);
         nonce++;
-        emit Transfer(msg.sender, recepient, amount, nonce, SwapType.Swap);
+        emit Transfer(msg.sender, recepient, amount, nonce, TransferType.Swap);
     }
 
     function redeem(
         address sender,
-        address recepient,
+        address recipient,
         uint256 amount,
         uint256 _nonce,
+        uint8 initChainId,
+        uint8 destChainId,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -69,7 +62,7 @@ contract MyBridge is IMyBridge, AccessControl {
         bytes32 message = keccak256(
             abi.encodePacked(
                 sender,
-                recepient,
+                recipient,
                 amount,
                 _nonce,
                 initChainId,
@@ -82,10 +75,9 @@ contract MyBridge is IMyBridge, AccessControl {
             hasRole(VALIDATOR_ROLE, signer),
             "Bridge: Invalid validator address"
         );
-        require(signer == sender, "Invalid signature");
         require(!usedNonce[_nonce], "Nonce already used");
         usedNonce[_nonce] = true;
-        token.mint(recepient, amount);
-        emit Transfer(sender, recepient, amount, _nonce, SwapType.Redeem);
+        token.mint(recipient, amount);
+        emit Transfer(sender, recipient, amount, _nonce, TransferType.Redeem);
     }
 }

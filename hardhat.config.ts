@@ -61,7 +61,7 @@ export const contractData: {
   [key: string]: string;
 } = { address: "0x6C5d3aba885c93cd9299C918Fc27a1D66468CDeB" };
 
-const chainIds = {
+export const chainIds = {
   "arbitrum-mainnet": 42161,
   avalanche: 43114,
   bsc: 56,
