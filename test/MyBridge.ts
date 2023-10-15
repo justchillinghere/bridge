@@ -10,42 +10,18 @@ import {
   MyToken,
   MyToken__factory,
 } from "../src/types";
-
-function generateMessage(
-  senderAddress: string,
-  recipientAddress: string,
-  amount: BigNumber,
-  nonce: BigNumber,
-  initChainId: number,
-  destChainId: number
-): string {
-  return ethers.utils.solidityKeccak256(
-    ["address", "address", "uint256", "uint256", "uint8", "uint8"],
-    [senderAddress, recipientAddress, amount, nonce, initChainId, destChainId]
-  );
-}
-
-async function signMessage(
-  message: string,
-  signer: SignerWithAddress
-): Promise<string> {
-  return await signer.signMessage(ethers.utils.arrayify(message));
-}
-
-function splitSignature(signature: string): {
-  v: number;
-  r: string;
-  s: string;
-} {
-  return ethers.utils.splitSignature(signature);
-}
+import {
+  generateMessage,
+  signMessage,
+  splitSignature,
+} from "../utils/signature";
 
 async function swapAndRedeem(
   sender: SignerWithAddress,
   recipient: SignerWithAddress,
   amount: BigNumber,
-  initChainId: number,
-  destChainId: number,
+  initChainId: BigNumber,
+  destChainId: BigNumber,
   contractETH: MyBridge,
   contractBSC: MyBridge,
   signer: SignerWithAddress
@@ -90,9 +66,8 @@ describe("Test Bridge contract", function () {
 
   let amount: BigNumber;
   let nonce: BigNumber;
-  const initChainId: Number = chainIds.mainnet;
-  const destChainId: Number = chainIds.bsc;
-
+  const initChainId: BigNumber = BigNumber.from(chainIds.mainnet);
+  const destChainId: BigNumber = BigNumber.from(chainIds.bsc);
   const transferType = { swap: 0, redeem: 1 };
 
   beforeEach(async () => {

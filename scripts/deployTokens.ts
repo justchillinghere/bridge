@@ -23,8 +23,7 @@ async function main() {
     }
     const tokenContract: MyToken = await MyContract.deploy(
       tokenData[token].name,
-      tokenData[token].symbol,
-      tokenData[token].decimals
+      tokenData[token].symbol
     );
     await tokenContract.deployed();
     console.log(`Token ${token} has been deployed to ${tokenContract.address}`);

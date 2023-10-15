@@ -15,12 +15,12 @@ const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 // Ensure that we have all the environment variables we need.
-const mnemonic: string | undefined = process.env.MNEMONIC;
+export const mnemonic: string | undefined = process.env.MNEMONIC;
 if (!mnemonic) {
   throw new Error("Please set your MNEMONIC in a .env file");
 }
 
-const rpcUrl: string | undefined = process.env.RPC_URL;
+export const rpcUrl: string | undefined = process.env.RPC_URL;
 if (!rpcUrl) {
   throw new Error("Please set your RPC_URL in a .env file");
 }
@@ -28,11 +28,6 @@ if (!rpcUrl) {
 const alchemyAPI: string | undefined = process.env.ALCHEMY_API;
 if (!alchemyAPI) {
   throw new Error("Please set your ALCHEMY_API in a .env file");
-}
-
-export const contractAddress: string | undefined = process.env.CONTRACT_ADDRESS;
-if (!contractAddress) {
-  throw new Error("Please set your CONTRACT_ADDRESS in a .env file");
 }
 
 export const tokenData: {
@@ -43,25 +38,19 @@ export const tokenData: {
     address: string;
   };
 } = {
-  tokenTST: {
-    name: "tokenTST",
-    symbol: "TST",
+  tokenETH: {
+    name: "tokenETH",
+    symbol: "ETH",
     decimals: 18,
-    address: "0x32dD40A2AD6C08Aec74350D0D98B37D49F1dc736",
-  },
-  tokenUSD: {
-    name: "tokenUSD",
-    symbol: "USD",
-    decimals: 6,
-    address: "0x199DA96aCe622c8fFf5f9b632968E3E2847526D3",
+    address: "",
   },
 };
 
-export const contractData: {
+export const contractsAddresses: {
   [key: string]: string;
-} = { address: "0x6C5d3aba885c93cd9299C918Fc27a1D66468CDeB" };
+} = { bsc: "", goerli: "" };
 
-export const chainIds = {
+export const chainIds: { [key: string]: number } = {
   "arbitrum-mainnet": 42161,
   avalanche: 43114,
   bsc: 56,
